@@ -39,6 +39,8 @@ CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d=
 | `CF_EMAIL` | Cloudflare account email |
 | `CF_ZONE_ID` | Cloudflare zone ID for buildzero.ai |
 | `CF_WORKER_TOKEN` | Cloudflare API Token for wrangler (Workers deploy) |
+| `LAB_TEST_EMAIL` | Lab user com OAuth tokens válidos |
+| `LAB_TEST_PASSWORD` | Senha do lab test user |
 
 ## Prefer helper scripts
 
