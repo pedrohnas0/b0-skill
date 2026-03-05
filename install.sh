@@ -31,8 +31,8 @@ echo -e "  ${D}│${R}"
 
 # System packages
 apt-get update -qq > /dev/null 2>&1
-apt-get install -y -qq curl git python3 > /dev/null 2>&1
-ok "system packages" "curl · git · python3"
+apt-get install -y -qq curl git python3 unzip > /dev/null 2>&1
+ok "system packages" "curl · git · python3 · unzip"
 
 # Claude Code
 if ! su - "$TARGET_USER" -c "command -v claude" &> /dev/null; then
@@ -40,6 +40,14 @@ if ! su - "$TARGET_USER" -c "command -v claude" &> /dev/null; then
 fi
 CLAUDE_V=$(su - "$TARGET_USER" -c "~/.local/bin/claude --version 2>/dev/null" || echo "?")
 ok "claude code" "$CLAUDE_V"
+
+# Bun
+if ! su - "$TARGET_USER" -c "command -v bun" &> /dev/null; then
+  su - "$TARGET_USER" -c "curl -fsSL https://bun.sh/install | bash" > /dev/null 2>&1
+fi
+su - "$TARGET_USER" -c "mkdir -p '$BIN_DIR' && ln -sf ~/.bun/bin/bun '$BIN_DIR/bun'"
+BUN_V=$(su - "$TARGET_USER" -c "~/.bun/bin/bun --version 2>/dev/null" || echo "?")
+ok "bun" "$BUN_V"
 
 # Clone b0-skill
 if [ -d "$SKILL_DIR/.git" ]; then

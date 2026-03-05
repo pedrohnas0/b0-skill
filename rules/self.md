@@ -58,28 +58,13 @@ Private repo for persistent knowledge between sessions. Created automatically by
 
 - **Remote**: `https://github.com/<user>/.memory` (private)
 - **Local**: `~/dev/.memory/`
+- **Meta**: read `~/dev/.memory/README.md` for full structure, procedures, and conventions
 
-Structure:
-
-```
-.memory/
-├── sessions/          # session logs (YYYY-MM-DD.md)
-├── inbox/             # quick ideas (one file per idea)
-├── environment.md     # installed tools, versions, accounts
-├── patterns.md        # UI system, coding conventions
-├── discoveries.md     # bugs, workarounds
-├── decisions.md       # architectural decisions with rationale
-├── projects.md        # active projects and their state
-└── references.md      # useful URLs, repos, docs
-```
-
-All files use YAML frontmatter (name, description, updated, tags).
-
-To sync memory manually:
+To sync memory:
 
 ```bash
 cd ~/dev/.memory
-git add -A && git commit -m "update" && git push
+git add -A && git commit -m "description" && git push
 ```
 
 `b0` shows memory status (dirty/clean, remote, content counts).

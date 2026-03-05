@@ -22,6 +22,7 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | [rules/env.md](rules/env.md) | Loading secrets from `.env` in the Bash tool. Read this FIRST if you need any env var. |
 | [rules/system.md](rules/system.md) | Running commands with sudo, installing packages with apt |
 | [rules/cloudflare.md](rules/cloudflare.md) | DNS, redirects, or any Cloudflare API operation |
+| [rules/planning.md](rules/planning.md) | Developing projects, writing tests, creating plans, or exploring codebases. |
 | [rules/self.md](rules/self.md) | Updating this skill itself (commit, push, test) |
 
 ## Scripts

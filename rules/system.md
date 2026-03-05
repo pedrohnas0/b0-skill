@@ -37,3 +37,12 @@ s apt-get install -y <package>
 - Shell: bash
 - User: pedro
 - WSL exe: `/mnt/c/Windows/System32/wsl.exe`
+
+## Additional tools
+
+| Tool | Location |
+|------|----------|
+| `bun` | `~/.local/bin/bun` → `~/.bun/bin/bun` |
+| `vercel` | `~/.local/bin/vercel` → `~/.bun/bin/vercel` |
+
+Both installed via bun, symlinked to `~/.local/bin/` for PATH access.
