@@ -31,5 +31,7 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | `s <cmd>` | Runs command with sudo (reads password from .env) |
 | `ghcp <repo> <path> <dest>` | Copies a directory from GitHub to local |
 | `cf <action> [args]` | Cloudflare API helper |
+| `b0` | Environment status and health check |
 
 All scripts are in `scripts/` and symlinked to `~/.local/bin/`.
+Shared UI module: `scripts/ui.py` — imported by all scripts for consistent output.

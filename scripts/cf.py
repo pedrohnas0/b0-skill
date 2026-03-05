@@ -16,6 +16,10 @@ import sys
 import urllib.request
 from pathlib import Path
 
+SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/meta/scripts")
+sys.path.insert(0, str(SCRIPTS_DIR))
+import ui
+
 ENV_FILE = Path("/home/pedro/dev/.claude/skills/meta/.env")
 
 
@@ -45,16 +49,41 @@ def zone_id():
 
 
 def cmd_zones():
+    ui.header("cf zones")
     result = api("GET", "zones")
+    ui.group_start("zones")
     for z in result["result"]:
-        print(f"  {z['name']}  {z['id']}  ({z['plan']['name']})")
+        ui.list_item(z["name"], z["id"], z["plan"]["name"])
+    ui.result(f"{len(result['result'])} zones")
 
 
 def cmd_dns_list():
+    ui.header("cf dns list")
     result = api("GET", f"zones/{zone_id()}/dns_records")
-    for r in result["result"]:
-        proxied = "proxied" if r.get("proxied") else "direct"
-        print(f"  {r['type']:6} {r['name']:40} {r['content']:30} {proxied}  id={r['id']}")
+    records = result["result"]
+
+    # Group by type
+    by_type = {}
+    for r in records:
+        t = r["type"]
+        if t not in by_type:
+            by_type[t] = []
+        by_type[t].append(r)
+
+    types = sorted(by_type.keys())
+    for i, t in enumerate(types):
+        if i == 0:
+            ui.group_start(t)
+        elif i == len(types) - 1:
+            ui.group_end(t)
+        else:
+            ui.group_mid(t)
+
+        for r in by_type[t]:
+            tag = "proxied" if r.get("proxied") else "direct"
+            ui.list_item(r["name"], r["content"], tag)
+
+    ui.result(f"{len(records)} records")
 
 
 def cmd_dns_create(rtype, name, content):
@@ -62,23 +91,30 @@ def cmd_dns_create(rtype, name, content):
         "type": rtype, "name": name, "content": content, "proxied": True
     })
     if result["success"]:
-        print(f"  Created: {rtype} {name} -> {content}")
+        ui.ok("dns record created")
+        ui.list_item(f"{rtype} {name}", content)
     else:
-        print(f"  Error: {result['errors']}")
+        ui.fail("dns record failed", str(result["errors"]))
 
 
 def cmd_dns_delete(record_id):
     result = api("DELETE", f"zones/{zone_id()}/dns_records/{record_id}")
-    print(f"  {'Deleted' if result['success'] else result['errors']}")
+    if result["success"]:
+        ui.ok("dns record deleted", record_id)
+    else:
+        ui.fail("delete failed", str(result["errors"]))
 
 
 def cmd_pagerule_list():
+    ui.header("cf pagerule list")
     result = api("GET", f"zones/{zone_id()}/pagerules")
-    for r in result["result"]:
+    rules = result["result"]
+    ui.group_start("page rules")
+    for r in rules:
         target = r["targets"][0]["constraint"]["value"]
-        action = r["actions"][0]
-        url = action.get("value", {}).get("url", "?")
-        print(f"  {target} -> {url}  ({action['id']})  id={r['id']}")
+        url = r["actions"][0].get("value", {}).get("url", "?")
+        ui.list_item(target, url, r["id"][:12])
+    ui.result(f"{len(rules)} rules")
 
 
 def cmd_pagerule_create(match, url):
@@ -88,14 +124,18 @@ def cmd_pagerule_create(match, url):
         "status": "active"
     })
     if result["success"]:
-        print(f"  Created: {match} -> {url}")
+        ui.ok("page rule created")
+        ui.list_item(match, url)
     else:
-        print(f"  Error: {result['errors']}")
+        ui.fail("page rule failed", str(result["errors"]))
 
 
 def cmd_pagerule_delete(rule_id):
     result = api("DELETE", f"zones/{zone_id()}/pagerules/{rule_id}")
-    print(f"  {'Deleted' if result['success'] else result['errors']}")
+    if result["success"]:
+        ui.ok("page rule deleted", rule_id)
+    else:
+        ui.fail("delete failed", str(result["errors"]))
 
 
 def main():
@@ -110,7 +150,8 @@ def main():
         cmd_zones()
     elif cmd == "dns":
         if len(args) < 2:
-            sys.exit("Usage: cf dns <list|create|delete>")
+            ui.fail("usage: cf dns <list|create|delete>")
+            sys.exit(1)
         sub = args[1]
         if sub == "list":
             cmd_dns_list()
@@ -119,10 +160,11 @@ def main():
         elif sub == "delete" and len(args) == 3:
             cmd_dns_delete(args[2])
         else:
-            sys.exit("Usage: cf dns <list|create <type> <name> <content>|delete <id>>")
+            ui.fail("usage: cf dns <list|create <type> <name> <content>|delete <id>>")
     elif cmd == "pagerule":
         if len(args) < 2:
-            sys.exit("Usage: cf pagerule <list|create|delete>")
+            ui.fail("usage: cf pagerule <list|create|delete>")
+            sys.exit(1)
         sub = args[1]
         if sub == "list":
             cmd_pagerule_list()
@@ -131,7 +173,7 @@ def main():
         elif sub == "delete" and len(args) == 3:
             cmd_pagerule_delete(args[2])
         else:
-            sys.exit("Usage: cf pagerule <list|create <match> <url>|delete <id>>")
+            ui.fail("usage: cf pagerule <list|create <match> <url>|delete <id>>")
     else:
         print(__doc__)
         sys.exit(1)
