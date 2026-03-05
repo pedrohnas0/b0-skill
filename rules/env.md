@@ -38,6 +38,7 @@ CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d=
 | `CF_API_KEY` | Cloudflare Global API Key |
 | `CF_EMAIL` | Cloudflare account email |
 | `CF_ZONE_ID` | Cloudflare zone ID for buildzero.ai |
+| `CF_WORKER_TOKEN` | Cloudflare API Token for wrangler (Workers deploy) |
 
 ## Prefer helper scripts
 
