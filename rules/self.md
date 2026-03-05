@@ -55,7 +55,9 @@ Note: use the commit hash in the URL to bypass GitHub's raw content cache.
 ## Adding new scripts
 
 1. Create `scripts/<name>.py` with `#!/usr/bin/env python3`
-2. Make executable: `chmod +x scripts/<name>.py`
-3. Symlink: `ln -sf /home/pedro/dev/.claude/skills/meta/scripts/<name>.py ~/.local/bin/<name>`
-4. Add entry to the scripts table in `SKILL.md`
-5. Commit and push
+2. Import ui: `sys.path.insert(0, str(Path("/home/pedro/dev/.claude/skills/meta/scripts"))); import ui`
+3. Use `ui.*` functions for all output (see `scripts/ui.py` for available functions)
+4. Make executable: `chmod +x scripts/<name>.py`
+5. Symlink: `ln -sf /home/pedro/dev/.claude/skills/meta/scripts/<name>.py ~/.local/bin/<name>`
+6. Add entry to the scripts table in `SKILL.md`
+7. Commit and push

@@ -23,8 +23,10 @@ Use the `cf` helper script when possible. For manual curl, load vars per [rules/
 cf zones                              # list zones
 cf dns list                           # list DNS records for buildzero.ai
 cf dns create <type> <name> <content> # create DNS record
+cf dns delete <record_id>             # delete DNS record
 cf pagerule list                      # list page rules
 cf pagerule create <match> <url>      # create redirect page rule
+cf pagerule delete <rule_id>          # delete page rule
 ```
 
 ## Manual curl pattern
