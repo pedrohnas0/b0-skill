@@ -7,7 +7,7 @@ set -e
 REPO="pedrohnas0/b0-skill"
 TARGET_USER="${SUDO_USER:-$(getent passwd 1000 | cut -d: -f1 || echo $USER)}"
 TARGET_HOME=$(eval echo "~$TARGET_USER")
-SKILL_DIR="$TARGET_HOME/dev/.claude/skills/meta"
+SKILL_DIR="$TARGET_HOME/dev/.claude/skills/b0-skill"
 BIN_DIR="$TARGET_HOME/.local/bin"
 
 G='\033[32m'  # green

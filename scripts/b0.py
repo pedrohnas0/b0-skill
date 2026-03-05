@@ -10,11 +10,11 @@ import urllib.request
 import sys
 from pathlib import Path
 
-SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/meta/scripts")
+SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill/scripts")
 sys.path.insert(0, str(SCRIPTS_DIR))
 import ui
 
-SKILL_DIR = Path("/home/pedro/dev/.claude/skills/meta")
+SKILL_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill")
 ENV_FILE = SKILL_DIR / ".env"
 SYMLINKS = {"s": "s.py", "ghcp": "ghcp.py", "cf": "cf.py", "b0": "b0.py"}
 

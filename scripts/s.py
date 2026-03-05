@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/meta/scripts")
+SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill/scripts")
 ENV_FILE = SCRIPTS_DIR.parent / ".env"
 sys.path.insert(0, str(SCRIPTS_DIR))
 import ui

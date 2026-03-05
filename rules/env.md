@@ -11,7 +11,7 @@ In Claude Code's Bash tool, `source .env` does NOT reliably make variables avail
 
 ```bash
 # BROKEN — do NOT use
-source /home/pedro/dev/.claude/skills/meta/.env && echo "$SUDO_PASSWORD" | sudo -S whoami
+source /home/pedro/dev/.claude/skills/b0-skill/.env && echo "$SUDO_PASSWORD" | sudo -S whoami
 ```
 
 ## The solution
@@ -19,15 +19,15 @@ source /home/pedro/dev/.claude/skills/meta/.env && echo "$SUDO_PASSWORD" | sudo 
 Use `grep | cut` to load individual variables:
 
 ```bash
-MY_VAR=$(grep MY_VAR /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
+MY_VAR=$(grep MY_VAR /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
 ```
 
 For multiple variables:
 
 ```bash
-CF_EMAIL=$(grep CF_EMAIL /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
-CF_KEY=$(grep CF_API_KEY /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
-CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
+CF_EMAIL=$(grep CF_EMAIL /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+CF_KEY=$(grep CF_API_KEY /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
 ```
 
 ## Available variables

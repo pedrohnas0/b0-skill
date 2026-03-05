@@ -9,7 +9,7 @@ Dev environment toolkit for WSL. Provides helper scripts, secret management, and
 
 **Repo**: https://github.com/pedrohnas0/b0-skill
 **Install**: `curl -fsSL buildzero.ai/install | sudo bash`
-**Location**: `/home/pedro/dev/.claude/skills/meta/`
+**Location**: `/home/pedro/dev/.claude/skills/b0-skill/`
 
 ## Secrets
 

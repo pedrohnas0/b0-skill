@@ -10,7 +10,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/meta/scripts")
+SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill/scripts")
 sys.path.insert(0, str(SCRIPTS_DIR))
 import ui
 

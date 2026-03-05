@@ -32,9 +32,9 @@ cf pagerule delete <rule_id>          # delete page rule
 ## Manual curl pattern
 
 ```bash
-CF_EMAIL=$(grep CF_EMAIL /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
-CF_KEY=$(grep CF_API_KEY /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
-CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/meta/.env | cut -d= -f2)
+CF_EMAIL=$(grep CF_EMAIL /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+CF_KEY=$(grep CF_API_KEY /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
 
 curl -s "https://api.cloudflare.com/client/v4/zones/$CF_ZONE/dns_records" \
   -H "X-Auth-Email: $CF_EMAIL" \
