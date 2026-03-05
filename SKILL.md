@@ -35,3 +35,9 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 
 All scripts are in `scripts/` and symlinked to `~/.local/bin/`.
 Shared UI module: `scripts/ui.py` — imported by all scripts for consistent output.
+
+## Memory
+
+The installer sets up `~/dev/.memory/` as a **private** GitHub repo if `gh` is authenticated.
+This directory stores session logs, decisions, patterns, and other persistent knowledge between Claude Code sessions.
+See [rules/self.md](rules/self.md) for details on memory management.

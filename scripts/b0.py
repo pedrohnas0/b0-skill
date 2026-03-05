@@ -109,7 +109,7 @@ def check_services():
 
 
 def check_skill():
-    ui.group_end("b0-skill")
+    ui.group_mid("b0-skill")
 
     # Repo sync
     if (SKILL_DIR / ".git").exists():
@@ -153,6 +153,40 @@ def check_skill():
         ui.item_warn("scripts", f"{ui.dim('·')} ".join(linked), f"missing: {', '.join(missing)}")
 
 
+def check_memory():
+    ui.group_end("memory")
+
+    memory_dir = Path.home() / "dev" / ".memory"
+
+    if not memory_dir.exists():
+        ui.item_none("status", ui.dim("—"), "not created")
+        return
+
+    if (memory_dir / ".git").exists():
+        head = run(f"git -C {memory_dir} rev-parse --short HEAD")
+        status = run(f"git -C {memory_dir} status --porcelain")
+        remote = run(f"git -C {memory_dir} remote get-url origin")
+
+        if status:
+            ui.item_warn("repo", "dirty", head or "?")
+        else:
+            ui.item_ok("repo", "clean", head or "?")
+
+        if remote:
+            ui.item_ok("remote", remote.replace("https://github.com/", "").replace(".git", ""))
+        else:
+            ui.item_warn("remote", "none")
+    else:
+        ui.item_none("repo", ui.dim("—"), "not versioned")
+
+    # Count content
+    sessions = list((memory_dir / "sessions").glob("*.md")) if (memory_dir / "sessions").exists() else []
+    inbox = list((memory_dir / "inbox").glob("*")) if (memory_dir / "inbox").exists() else []
+    topics = [f for f in memory_dir.glob("*.md") if f.name != "README.md"]
+
+    ui.item_ok("content", f"{len(sessions)} sessions · {len(inbox)} inbox · {len(topics)} topics")
+
+
 def load_env():
     env = {}
     if ENV_FILE.exists():
@@ -168,6 +202,7 @@ def main():
     check_system()
     check_services()
     check_skill()
+    check_memory()
     print()
 
 

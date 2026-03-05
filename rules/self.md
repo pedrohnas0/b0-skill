@@ -52,6 +52,38 @@ Note: use the commit hash in the URL to bypass GitHub's raw content cache.
 2. Add entry to the table in `SKILL.md`
 3. Commit and push
 
+## Memory (~/dev/.memory/)
+
+Private repo for persistent knowledge between sessions. Created automatically by the installer if `gh` is authenticated.
+
+- **Remote**: `https://github.com/<user>/.memory` (private)
+- **Local**: `~/dev/.memory/`
+
+Structure:
+
+```
+.memory/
+├── sessions/          # session logs (YYYY-MM-DD.md)
+├── inbox/             # quick ideas (one file per idea)
+├── environment.md     # installed tools, versions, accounts
+├── patterns.md        # UI system, coding conventions
+├── discoveries.md     # bugs, workarounds
+├── decisions.md       # architectural decisions with rationale
+├── projects.md        # active projects and their state
+└── references.md      # useful URLs, repos, docs
+```
+
+All files use YAML frontmatter (name, description, updated, tags).
+
+To sync memory manually:
+
+```bash
+cd ~/dev/.memory
+git add -A && git commit -m "update" && git push
+```
+
+`b0` shows memory status (dirty/clean, remote, content counts).
+
 ## Adding new scripts
 
 1. Create `scripts/<name>.py` with `#!/usr/bin/env python3`

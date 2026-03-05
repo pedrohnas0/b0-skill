@@ -8,6 +8,7 @@ REPO="pedrohnas0/b0-skill"
 TARGET_USER="${SUDO_USER:-$(getent passwd 1000 | cut -d: -f1 || echo $USER)}"
 TARGET_HOME=$(eval echo "~$TARGET_USER")
 SKILL_DIR="$TARGET_HOME/dev/.claude/skills/b0-skill"
+MEMORY_DIR="$TARGET_HOME/dev/.memory"
 BIN_DIR="$TARGET_HOME/.local/bin"
 
 G='\033[32m'  # green
@@ -17,7 +18,7 @@ R='\033[0m'   # reset
 
 ok()   { echo -e "  ${D}├─${R} $1$(printf '%*s' $((28 - ${#1})) '')${G}✓${R}  ${D}$2${R}"; }
 last() { echo -e "  ${D}└─${R} $1$(printf '%*s' $((28 - ${#1})) '')${G}✓${R}  ${D}$2${R}"; }
-fail() { echo -e "  ${D}├─${R} $1$(printf '%*s' $((28 - ${#1})) '')\033[31m✗${R}  $2"; }
+skip() { echo -e "  ${D}├─${R} $1$(printf '%*s' $((28 - ${#1})) '')${D}—  $2${R}"; }
 
 # Check root
 if [ "$(id -u)" -ne 0 ]; then
@@ -70,7 +71,56 @@ su - "$TARGET_USER" -c "
     echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> '$TARGET_HOME/.bashrc'
   fi
 "
-last "symlinks" "s · ghcp · cf · b0"
+ok "symlinks" "s · ghcp · cf · b0"
+
+# Memory repo (private) — only if gh is authenticated
+GH_USER=$(su - "$TARGET_USER" -c "gh api user --jq .login 2>/dev/null" 2>/dev/null || true)
+
+if [ -n "$GH_USER" ]; then
+  if [ -d "$MEMORY_DIR/.git" ]; then
+    # Already versioned, pull latest
+    su - "$TARGET_USER" -c "git -C '$MEMORY_DIR' pull -q 2>/dev/null" || true
+    last "memory" "synced → $GH_USER/.memory"
+
+  elif su - "$TARGET_USER" -c "gh repo view '$GH_USER/.memory' 2>/dev/null" &> /dev/null; then
+    # Repo exists on GitHub, clone it
+    su - "$TARGET_USER" -c "git clone -q 'https://github.com/$GH_USER/.memory.git' '$MEMORY_DIR'" 2>/dev/null
+    last "memory" "cloned → $GH_USER/.memory"
+
+  else
+    # Create private repo
+    su - "$TARGET_USER" -c "gh repo create .memory --private --description 'Private dev memory' 2>/dev/null" || true
+
+    if [ -d "$MEMORY_DIR" ]; then
+      # .memory/ exists locally without git — init and push
+      su - "$TARGET_USER" -c "
+        cd '$MEMORY_DIR'
+        git init -q
+        git add -A
+        git commit -q -m 'init'
+        git branch -M main
+        git remote add origin 'https://github.com/$GH_USER/.memory.git'
+        git push -q -u origin main
+      " 2>/dev/null
+      last "memory" "created → $GH_USER/.memory (private)"
+    else
+      # Nothing exists, clone empty repo and create structure
+      su - "$TARGET_USER" -c "
+        mkdir -p '$MEMORY_DIR/sessions' '$MEMORY_DIR/inbox'
+        cd '$MEMORY_DIR'
+        git init -q
+        git add -A
+        git commit -q -m 'init' --allow-empty
+        git branch -M main
+        git remote add origin 'https://github.com/$GH_USER/.memory.git'
+        git push -q -u origin main
+      " 2>/dev/null
+      last "memory" "created → $GH_USER/.memory (private)"
+    fi
+  fi
+else
+  last "memory" "skipped (gh not authenticated)"
+fi
 
 echo -e "\n  ${G}✓${R} installed for ${B}$TARGET_USER${R}\n"
 echo -e "  ${D}s <cmd>                    run with sudo${R}"
