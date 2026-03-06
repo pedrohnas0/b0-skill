@@ -11,22 +11,25 @@ metadata:
 ~/dev/lab/
   services/
     auth/       Vercel  — users, JWT (signup, login, validate)
-    ai/         Vercel  — OAuth PKCE, token mgmt, proxy pro Worker
-    ai-worker/  CF Worker — streaming com AI SDK + masquerading
+    ai/         Vercel  — OAuth PKCE, token mgmt, gate (~100ms)
+    ai-worker/  CF Worker — streaming direto pro client (AI SDK + masquerading)
   e2e/          testes de integração (por plano)
 ```
 
-### Fluxo de request
+### Fluxo de request (direct connect)
 
 ```
-User → ai/api/chat (Vercel, <10s)
+Client → POST ai/api/chat (Vercel, ~100ms)
   → valida JWT via auth/api/validate
   → busca claude_tokens do Neon
   → refresh se expirado
-  → POST ai-worker { accessToken, message }
-    → masquerading fetch (OAuth headers, ?beta=true)
-    → generateText/streamText (AI SDK v6)
-    → resposta de volta
+  → retorna { workerUrl, sessionToken, accessToken }
+
+Client → POST ai-worker (Cloudflare, conexão longa)
+  → valida sessionToken (jose/jwtVerify, 5min TTL)
+  → masquerading fetch (OAuth headers, ?beta=true)
+  → streamText (AI SDK v6)
+  → streaming direto pro client
 ```
 
 ## URLs
