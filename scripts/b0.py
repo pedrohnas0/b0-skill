@@ -179,6 +179,21 @@ def check_memory():
     else:
         ui.item_none("repo", ui.dim("—"), "not versioned")
 
+    # Cloudflare tunnel
+    tunnel_status = run("systemctl is-active cloudflared-tunnel")
+    if tunnel_status == "active":
+        ui.item_ok("tunnel", "running", "memory-watch.buildzero.ai")
+    else:
+        ui.item_none("tunnel", ui.dim("—"), "inactive")
+
+    # Auto-commit daemon
+    status = run("systemctl is-active memory-watch")
+    if status == "active":
+        pid = run("systemctl show memory-watch --property=MainPID --value")
+        ui.item_ok("auto-commit", f"running (pid {pid})")
+    else:
+        ui.item_none("auto-commit", ui.dim("—"), "inactive")
+
     # Count content
     sessions = list((memory_dir / "sessions").glob("*.md")) if (memory_dir / "sessions").exists() else []
     inbox = list((memory_dir / "inbox").glob("*")) if (memory_dir / "inbox").exists() else []

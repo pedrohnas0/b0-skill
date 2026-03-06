@@ -1,0 +1,12 @@
+[Unit]
+Description=Cloudflare Tunnel (memory-watch)
+After=network.target
+
+[Service]
+User=pedro
+ExecStart=/usr/bin/cloudflared tunnel run memory-watch
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

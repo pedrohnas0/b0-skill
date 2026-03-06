@@ -1,0 +1,14 @@
+[Unit]
+Description=Memory auto-commit daemon
+After=network.target cloudflared-tunnel.service
+Requires=cloudflared-tunnel.service
+
+[Service]
+User=pedro
+ExecStart=/usr/bin/python3 /home/pedro/dev/.claude/skills/b0-skill/scripts/memory-watch.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

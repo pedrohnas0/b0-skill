@@ -81,6 +81,34 @@ su - "$TARGET_USER" -c "
 "
 ok "symlinks" "s · ghcp · cf · b0"
 
+# Cloudflared tunnel
+if ! command -v cloudflared &> /dev/null; then
+  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg > /dev/null
+  echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/cloudflared.list > /dev/null
+  apt-get update -qq > /dev/null 2>&1
+  apt-get install -y -qq cloudflared > /dev/null 2>&1
+fi
+CLOUDFLARED_V=$(cloudflared --version 2>/dev/null | head -1 | awk '{print $3}' || echo "?")
+ok "cloudflared" "$CLOUDFLARED_V"
+
+# Cloudflared tunnel service
+if [ -f "$SKILL_DIR/systemd/cloudflared-tunnel.service" ]; then
+  cp "$SKILL_DIR/systemd/cloudflared-tunnel.service" /etc/systemd/system/
+  sed -i "s|User=pedro|User=$TARGET_USER|g" /etc/systemd/system/cloudflared-tunnel.service
+  sed -i "s|/home/pedro|$TARGET_HOME|g" /etc/systemd/system/cloudflared-tunnel.service
+fi
+
+# Memory watch daemon
+apt-get install -y -qq python3-watchdog python3-requests > /dev/null 2>&1
+mkdir -p "$SKILL_DIR/systemd"
+cp "$SKILL_DIR/systemd/memory-watch.service" /etc/systemd/system/
+sed -i "s|User=pedro|User=$TARGET_USER|g" /etc/systemd/system/memory-watch.service
+sed -i "s|/home/pedro|$TARGET_HOME|g" /etc/systemd/system/memory-watch.service
+systemctl daemon-reload
+systemctl enable --now cloudflared-tunnel > /dev/null 2>&1 || true
+systemctl enable --now memory-watch > /dev/null 2>&1
+ok "memory-watch" "daemon + tunnel enabled"
+
 # Memory repo (private) — only if gh is authenticated
 GH_USER=$(su - "$TARGET_USER" -c "gh api user --jq .login 2>/dev/null" 2>/dev/null || true)
 
