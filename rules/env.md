@@ -41,6 +41,15 @@ CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d=
 | `CF_WORKER_TOKEN` | Cloudflare API Token for wrangler (Workers deploy) |
 | `LAB_TEST_EMAIL` | Lab user com OAuth tokens válidos |
 | `LAB_TEST_PASSWORD` | Senha do lab test user |
+| `META_APP_ID` | Meta App ID (Lab Ads — Pedro) |
+| `META_APP_SECRET` | Meta App Secret (Lab Ads — Pedro) |
+| `META_ACCESS_TOKEN` | Meta long-lived token Pedro (60 dias, renovar quando expirar) |
+| `JK_META_APP_ID` | Meta App ID (JK Ads — Joaquim) |
+| `JK_META_APP_SECRET` | Meta App Secret (JK Ads — Joaquim) |
+| `JK_META_ACCESS_TOKEN` | Meta long-lived token Joaquim (60 dias, criado 2026-03-08) |
+| `R2_ACCESS_KEY_ID` | R2 S3-compatible Access Key ID (bucket lab-sandbox-storage) |
+| `R2_SECRET_ACCESS_KEY` | R2 S3-compatible Secret Access Key |
+| `R2_ENDPOINT` | R2 S3 endpoint (https://{account_id}.r2.cloudflarestorage.com) |
 
 ## Prefer helper scripts
 

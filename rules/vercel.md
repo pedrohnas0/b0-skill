@@ -16,6 +16,7 @@ metadata:
 |---------|---------|-----------|
 | auth | Auth (users, JWT) | `~/dev/lab/services/auth` |
 | ai | AI (Claude proxy, OAuth, streaming) | `~/dev/lab/services/ai` |
+| web | Frontend (Next.js + Clerk) | `~/dev/lab/services/web` |
 
 ## Neon databases
 
@@ -63,10 +64,12 @@ Outras opções úteis: `--name` (nome custom), `-m auth=true` (auth built-in), 
 # Preview deploy
 vercel deploy --cwd ~/dev/lab/services/auth
 vercel deploy --cwd ~/dev/lab/services/ai
+vercel deploy --cwd ~/dev/lab/services/web
 
 # Production
 vercel deploy --prod --cwd ~/dev/lab/services/auth
 vercel deploy --prod --cwd ~/dev/lab/services/ai
+vercel deploy --prod --cwd ~/dev/lab/services/web
 ```
 
 ## Bug: trailing `\n` ao adicionar env vars via pipe

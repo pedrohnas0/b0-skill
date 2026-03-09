@@ -1,0 +1,13 @@
+[Unit]
+Description=b0 Agent Daemon
+After=network.target
+
+[Service]
+User=pedro
+EnvironmentFile=/home/pedro/dev/.claude/skills/b0-skill/.env
+ExecStart=/usr/bin/python3 /home/pedro/dev/.claude/skills/b0-skill/scripts/agent-daemon.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
