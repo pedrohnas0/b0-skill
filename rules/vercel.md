@@ -24,8 +24,8 @@ Cada service tem seu banco Postgres isolado no Neon (gru1 — São Paulo).
 
 | Resource | Project | Region |
 |----------|---------|--------|
-| lab-auth-db | auth | gru1 (São Paulo) |
-| lab-ai-db | ai | gru1 (São Paulo) |
+| b0-auth-db | auth | gru1 (São Paulo) |
+| b0-ai-db | ai | gru1 (São Paulo) |
 
 Dashboard: https://vercel.com/d/dashboard/integrations/neon
 

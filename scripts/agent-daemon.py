@@ -133,7 +133,7 @@ async def main():
     api_key = os.environ["B0_API_KEY"]
     name = get_daemon_name()
     url = os.environ.get(
-        "WORKER_WS_URL", "wss://lab-ai-worker.pedrohnas0.workers.dev/ws"
+        "WORKER_WS_URL", "wss://b0-ai-worker.pedrohnas0.workers.dev/ws"
     )
     backoff = 1
 
