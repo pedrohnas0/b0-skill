@@ -1,8 +1,8 @@
 ---
 name: vercel
-description: Vercel projects, Neon databases, and deployment patterns for the lab monorepo
+description: Vercel projects, Neon databases, and deployment patterns for the buildzero monorepo
 metadata:
-  tags: vercel, neon, deploy, database, lab
+  tags: vercel, neon, deploy, database, buildzero
 ---
 
 ## Team
@@ -14,9 +14,9 @@ metadata:
 
 | Project | Service | Directory |
 |---------|---------|-----------|
-| auth | Auth (users, JWT) | `~/dev/lab/services/auth` |
-| ai | AI (Claude proxy, OAuth, streaming) | `~/dev/lab/services/ai` |
-| web | Frontend (Next.js + Clerk) | `~/dev/lab/services/web` |
+| auth | Auth (users, JWT) | `~/dev/buildzero/services/auth` |
+| ai | AI (Claude proxy, OAuth, streaming) | `~/dev/buildzero/services/ai` |
+| web | Frontend (Next.js + Clerk) | `~/dev/buildzero/services/web` |
 
 ## Neon databases
 
@@ -41,14 +41,14 @@ Gerenciadas pela Vercel. Cada project tem:
 Para puxar envs localmente:
 
 ```bash
-cd ~/dev/lab/services/<service>
+cd ~/dev/buildzero/services/<service>
 vercel env pull    # cria/atualiza .env.local
 ```
 
 ## Adicionando Neon a um projeto
 
 ```bash
-cd ~/dev/lab/services/<novo-service>
+cd ~/dev/buildzero/services/<novo-service>
 vercel link --yes                                          # linka o diretorio a um project
 vercel integration add neon --name <nome> -m region=gru1   # provisiona Neon em São Paulo
 vercel env pull                                            # puxa DATABASE_URL pro .env.local
@@ -62,14 +62,14 @@ Outras opções úteis: `--name` (nome custom), `-m auth=true` (auth built-in), 
 
 ```bash
 # Preview deploy
-vercel deploy --cwd ~/dev/lab/services/auth
-vercel deploy --cwd ~/dev/lab/services/ai
-vercel deploy --cwd ~/dev/lab/services/web
+vercel deploy --cwd ~/dev/buildzero/services/auth
+vercel deploy --cwd ~/dev/buildzero/services/ai
+vercel deploy --cwd ~/dev/buildzero/services/web
 
 # Production
-vercel deploy --prod --cwd ~/dev/lab/services/auth
-vercel deploy --prod --cwd ~/dev/lab/services/ai
-vercel deploy --prod --cwd ~/dev/lab/services/web
+vercel deploy --prod --cwd ~/dev/buildzero/services/auth
+vercel deploy --prod --cwd ~/dev/buildzero/services/ai
+vercel deploy --prod --cwd ~/dev/buildzero/services/web
 ```
 
 ## Bug: trailing `\n` ao adicionar env vars via pipe

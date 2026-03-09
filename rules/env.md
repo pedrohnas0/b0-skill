@@ -39,10 +39,10 @@ CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d=
 | `CF_EMAIL` | Cloudflare account email |
 | `CF_ZONE_ID` | Cloudflare zone ID for buildzero.ai |
 | `CF_WORKER_TOKEN` | Cloudflare API Token for wrangler (Workers deploy) |
-| `LAB_TEST_EMAIL` | Lab user com OAuth tokens válidos |
-| `LAB_TEST_PASSWORD` | Senha do lab test user |
-| `META_APP_ID` | Meta App ID (Lab Ads — Pedro) |
-| `META_APP_SECRET` | Meta App Secret (Lab Ads — Pedro) |
+| `B0_TEST_EMAIL` | Test user com OAuth tokens válidos |
+| `B0_TEST_PASSWORD` | Senha do test user |
+| `META_APP_ID` | Meta App ID (Pedro) |
+| `META_APP_SECRET` | Meta App Secret (Pedro) |
 | `META_ACCESS_TOKEN` | Meta long-lived token Pedro (60 dias, renovar quando expirar) |
 | `JK_META_APP_ID` | Meta App ID (JK Ads — Joaquim) |
 | `JK_META_APP_SECRET` | Meta App Secret (JK Ads — Joaquim) |

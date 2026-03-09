@@ -24,7 +24,7 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | [rules/cloudflare.md](rules/cloudflare.md) | DNS, redirects, or any Cloudflare API operation |
 | [rules/vercel.md](rules/vercel.md) | Vercel projects, Neon databases, deploy, env vars |
 | [rules/planning.md](rules/planning.md) | Developing projects, writing tests, creating plans, or exploring codebases. |
-| [rules/lab.md](rules/lab.md) | Working on the lab monorepo (deploy, test, services, OAuth, constraints). |
+| [rules/buildzero.md](rules/buildzero.md) | Working on the buildzero monorepo (deploy, test, services, OAuth, constraints). |
 | [rules/self.md](rules/self.md) | Updating this skill itself (commit, push, test) |
 
 ## Scripts

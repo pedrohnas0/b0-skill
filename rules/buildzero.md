@@ -1,18 +1,21 @@
 ---
-name: lab
-description: Lab monorepo — services, deploy, testing, and operational patterns
+name: buildzero
+description: BuildZero monorepo — services, deploy, testing, and operational patterns
 metadata:
-  tags: lab, monorepo, vercel, cloudflare, ai, auth, deploy
+  tags: buildzero, monorepo, vercel, cloudflare, ai, auth, deploy
 ---
 
 ## Arquitetura
 
 ```
-~/dev/lab/
+~/dev/buildzero/
   services/
     auth/       Vercel  — users, JWT (signup, login, validate)
     ai/         Vercel  — OAuth PKCE, token mgmt, gate (~100ms)
     ai-worker/  CF Worker — streaming direto pro client (AI SDK + masquerading)
+    telegram/   CF Worker — webhook, commands, media, backpressure
+    sandbox/    CF Containers — execução de código isolada
+    web/        Next.js 16 / Vercel — landing page, signup
   e2e/          testes de integração (por plano)
 ```
 
@@ -38,18 +41,26 @@ Client → POST ai-worker (Cloudflare, conexão longa)
 |---------|----------|
 | auth | https://auth-lilac-five-97.vercel.app |
 | ai | https://ai-three-pi.vercel.app |
-| ai-worker | https://lab-ai-worker.pedrohnas0.workers.dev |
+| ai-worker | https://b0-ai-worker.pedrohnas0.workers.dev |
+| telegram | https://b0-telegram.pedrohnas0.workers.dev |
+| sandbox | https://b0-sandbox.pedrohnas0.workers.dev |
 
 ## Deploy
 
 ```bash
 # Auth e AI — Vercel
-cd ~/dev/lab/services/auth && vercel deploy --prod
-cd ~/dev/lab/services/ai && vercel deploy --prod
+cd ~/dev/buildzero/services/auth && vercel deploy --prod
+cd ~/dev/buildzero/services/ai && vercel deploy --prod
 
-# Worker — Cloudflare (precisa do token)
+# Workers — Cloudflare (precisa do token)
 CF_TOKEN=$(grep CF_WORKER_TOKEN /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
-cd ~/dev/lab/services/ai-worker && CLOUDFLARE_API_TOKEN="$CF_TOKEN" npx wrangler deploy
+cd ~/dev/buildzero/services/ai-worker && CLOUDFLARE_API_TOKEN="$CF_TOKEN" bunx wrangler deploy
+cd ~/dev/buildzero/services/telegram && CLOUDFLARE_API_TOKEN="$CF_TOKEN" bunx wrangler deploy
+
+# Sandbox — precisa Global API Key (R2 permissions)
+CF_KEY=$(grep CF_API_KEY /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+CF_EMAIL=$(grep CF_EMAIL /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d= -f2)
+cd ~/dev/buildzero/services/sandbox && CLOUDFLARE_API_KEY="$CF_KEY" CLOUDFLARE_EMAIL="$CF_EMAIL" bunx wrangler deploy
 ```
 
 Regra: deploy e validar e2e em cloud ANTES de commit.
@@ -58,20 +69,23 @@ Regra: deploy e validar e2e em cloud ANTES de commit.
 
 ```bash
 # Unitários (co-located, por service)
-cd ~/dev/lab/services/auth && bun test src/
-cd ~/dev/lab/services/ai && bun test src/
-cd ~/dev/lab/services/ai-worker && bun test src/
+cd ~/dev/buildzero/services/auth && bun test src/
+cd ~/dev/buildzero/services/ai && bun test src/
+cd ~/dev/buildzero/services/ai-worker && bun test src/
 
 # E2E (contra cloud)
-cd ~/dev/lab && AUTH_URL="https://auth-lilac-five-97.vercel.app" AI_URL="https://ai-three-pi.vercel.app" bun run e2e/plan-02.e2e.ts
+cd ~/dev/buildzero && bun run e2e/run.ts
 ```
 
 ## Env vars
 
-Gerenciadas pela Vercel. Pull local:
+Gerenciadas pela Vercel (auth, ai) e Cloudflare (workers). Pull local:
 
 ```bash
-cd ~/dev/lab/services/<service> && vercel env pull
+# Vercel services
+cd ~/dev/buildzero/services/<service> && vercel env pull
+
+# Workers — secrets em .dev.vars (local) e wrangler secret (cloud)
 ```
 
 | Var | Onde | Propósito |
@@ -122,14 +136,14 @@ Se ambos inválidos: precisa refazer OAuth (gerar link, user autoriza).
 - Account: `8261c0647800836894a376e98a5c4bfc` (Pedrohnas0)
 - `wrangler.toml` já tem `account_id`
 - Secrets via `wrangler secret put` (precisa `CLOUDFLARE_API_TOKEN`)
-- AI SDK v6: `ai@6.0.116`, `@ai-sdk/anthropic@2.0.65`
+- AI SDK v5: `ai@5.0.124`, `@ai-sdk/anthropic@2.0.65`
 - Model: `claude-sonnet-4-6`
 
 ## Novo service checklist
 
-1. `mkdir ~/dev/lab/services/<name>` + `package.json` + `tsconfig.json` (commonjs!)
+1. `mkdir ~/dev/buildzero/services/<name>` + `package.json` + `tsconfig.json` (commonjs!)
 2. `vercel link --yes` → linka ao projeto Vercel
-3. `vercel integration add neon --name lab-<name>-db -m region=gru1` → banco
+3. `vercel integration add neon --name b0-<name>-db -m region=gru1` → banco
 4. `vercel env pull` → env vars locais
 5. Escrever e2e primeiro, depois TDD módulo a módulo
 6. Deploy + e2e em cloud → commit
