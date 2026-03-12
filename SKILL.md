@@ -25,7 +25,7 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | [rules/vercel.md](rules/vercel.md) | Vercel projects, Neon databases, deploy, env vars |
 | [rules/neon.md](rules/neon.md) | Querying Neon databases, @neondatabase/serverless pitfalls |
 | [rules/planning.md](rules/planning.md) | Developing projects, writing tests, creating plans, or exploring codebases. |
-| [rules/buildzero.md](rules/buildzero.md) | Working on the buildzero monorepo (deploy, test, services, OAuth, constraints). |
+| [rules/deploy.md](rules/deploy.md) | Deploying buildzero services (deploy script, order, verification). |
 | [rules/self.md](rules/self.md) | Updating this skill itself (commit, push, test) |
 
 ## Scripts
