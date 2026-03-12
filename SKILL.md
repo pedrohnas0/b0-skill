@@ -23,6 +23,7 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | [rules/system.md](rules/system.md) | Running commands with sudo, installing packages with apt |
 | [rules/cloudflare.md](rules/cloudflare.md) | DNS, redirects, or any Cloudflare API operation |
 | [rules/vercel.md](rules/vercel.md) | Vercel projects, Neon databases, deploy, env vars |
+| [rules/neon.md](rules/neon.md) | Querying Neon databases, @neondatabase/serverless pitfalls |
 | [rules/planning.md](rules/planning.md) | Developing projects, writing tests, creating plans, or exploring codebases. |
 | [rules/buildzero.md](rules/buildzero.md) | Working on the buildzero monorepo (deploy, test, services, OAuth, constraints). |
 | [rules/self.md](rules/self.md) | Updating this skill itself (commit, push, test) |
@@ -35,6 +36,8 @@ All secrets live in `.env` (gitignored). Before using any secret in the Bash too
 | `ghcp <repo> <path> <dest>` | Copies a directory from GitHub to local |
 | `cf <action> [args]` | Cloudflare API helper |
 | `b0` | Environment status and health check |
+| `deploy` | Test, deploy, and verify buildzero services |
+| `db <service> <query>` | Query Neon databases (ai, auth) via HTTP API |
 
 All scripts are in `scripts/` and symlinked to `~/.local/bin/`.
 Shared UI module: `scripts/ui.py` — imported by all scripts for consistent output.

@@ -50,6 +50,8 @@ CF_ZONE=$(grep CF_ZONE_ID /home/pedro/dev/.claude/skills/b0-skill/.env | cut -d=
 | `R2_ACCESS_KEY_ID` | R2 S3-compatible Access Key ID (bucket b0-sandbox-storage) |
 | `R2_SECRET_ACCESS_KEY` | R2 S3-compatible Secret Access Key |
 | `R2_ENDPOINT` | R2 S3 endpoint (https://{account_id}.r2.cloudflarestorage.com) |
+| `GEMINI_OAUTH_REFRESH_TOKEN` | Google OAuth refresh token (Code Assist, pedrohnas0@gmail.com) |
+| `GEMINI_API_KEY` | Google AI Studio API key (TODO: gerar pra plan-12) |
 
 ## Prefer helper scripts
 
