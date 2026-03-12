@@ -16,6 +16,7 @@ import time
 import threading
 import urllib.request
 import json
+import sqlite3
 from pathlib import Path
 
 SCRIPTS_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill/scripts")
@@ -24,6 +25,7 @@ import ui
 
 BUILDZERO = Path.home() / "dev" / "buildzero"
 ENV_FILE = Path("/home/pedro/dev/.claude/skills/b0-skill/.env")
+DB_PATH = BUILDZERO / "tests" / "data" / "results.db"
 
 DEPLOY_ORDER = ["auth", "ai", "ai-worker", "telegram", "web"]
 
@@ -78,6 +80,14 @@ def run_cmd(cmd, cwd=None, extra_env=None, timeout=300):
 
 def fmt_t(secs):
     return f"{int(secs * 1000)}ms" if secs < 1 else f"{secs:.1f}s"
+
+
+def fmt_ms(ms):
+    if ms < 1000:
+        return f"{int(ms)}ms"
+    if ms < 60000:
+        return f"{ms/1000:.1f}s"
+    return f"{ms/60000:.1f}m"
 
 
 def strip_ansi(text):
@@ -315,8 +325,11 @@ def phase_deploy(services, env_vars, dry_run=False):
 
 # ── Verify ────────────────────────────────────────────
 
-def phase_verify(services, deploy_states=None):
-    ui.group_end("verify")
+def phase_verify(services, deploy_states=None, is_last=True):
+    if is_last:
+        ui.group_end("verify")
+    else:
+        ui.group_mid("verify")
 
     results = {}
 
@@ -368,14 +381,164 @@ def phase_verify(services, deploy_states=None):
     return all_ok
 
 
+# ── E2E ──────────────────────────────────────────────
+
+def _load_perf_history():
+    """Load per-group perf data from latest SQLite run."""
+    if not DB_PATH.exists():
+        return {}
+    try:
+        db = sqlite3.connect(str(DB_PATH))
+        db.row_factory = sqlite3.Row
+        latest = db.execute("SELECT id FROM runs ORDER BY id DESC LIMIT 1").fetchone()
+        if not latest:
+            db.close()
+            return {}
+        current = db.execute(
+            "SELECT name, duration_ms FROM groups WHERE run_id = ?", (latest["id"],)
+        ).fetchall()
+        result = {}
+        for g in current:
+            hist = db.execute(
+                """SELECT g.duration_ms FROM groups g
+                   JOIN runs r ON g.run_id = r.id
+                   WHERE g.name = ? ORDER BY r.id DESC LIMIT 20""",
+                (g["name"],)
+            ).fetchall()
+            durations = [r[0] for r in hist]
+            result[g["name"]] = {
+                "current_ms": g["duration_ms"],
+                "count": len(durations),
+                "avg": sum(durations) // len(durations) if durations else 0,
+                "best": min(durations) if durations else 0,
+            }
+        db.close()
+        return result
+    except Exception:
+        return {}
+
+
+def _parse_time(s):
+    """Parse '1.9s', '324ms', '2.0m' → milliseconds."""
+    s = s.strip()
+    if s.endswith("ms"):
+        return int(s[:-2])
+    if s.endswith("m"):
+        return int(float(s[:-1]) * 60000)
+    if s.endswith("s"):
+        return int(float(s[:-1]) * 1000)
+    return 0
+
+
+def _perf_detail(time_str, hist):
+    """Build detail string: time + historical comparison."""
+    if not hist or hist["count"] < 2:
+        return time_str
+    avg = hist["avg"]
+    cur = _parse_time(time_str)
+    pct = round(((cur - avg) / avg) * 100) if avg else 0
+    if pct > 15:
+        return f"{time_str}  avg {fmt_ms(avg)} {ui.red(f'▲ +{pct}%')}"
+    elif pct < -15:
+        return f"{time_str}  avg {fmt_ms(avg)} {ui.green(f'▼ {pct}%')}"
+    else:
+        return f"{time_str}  avg {fmt_ms(avg)}"
+
+
+def _e2e_summary(output):
+    """Parse runner summary line for total pass/fail/time."""
+    clean = strip_ansi("".join(output))
+    m = re.search(r"[✓✗]\s+(\d+)/(\d+)\s+passed\s+\((.+?)\)", clean)
+    if not m:
+        return
+    passed, total, t = int(m.group(1)), int(m.group(2)), m.group(3)
+    failed = total - passed
+    fail_part = f"  {ui.red(f'{failed} ✗')}" if failed else ""
+    ui.group_line()
+    print(f"  {ui.dim('│')}  {ui.green(f'{passed} ✓')}{fail_part}  {t}")
+
+
+def phase_e2e(layer="smoke,int,e2e", source="deploy"):
+    ui.group_end("e2e")
+
+    # Load perf history before running (for inline comparison)
+    perf = _load_perf_history()
+
+    cmd = [
+        "bun", "tests/run.ts",
+        "--layer", layer,
+        "--source", source,
+        "--quiet",
+    ]
+
+    P = f"  {ui.dim('│')}"
+
+    try:
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, cwd=str(BUILDZERO), bufsize=1,
+        )
+    except Exception as e:
+        ui.item_fail("runner", str(e)[:60])
+        return False
+
+    all_output = []
+    found = False
+
+    for raw in proc.stdout:
+        line = raw.rstrip("\n")
+        all_output.append(line)
+        clean = strip_ansi(line).strip()
+        if not clean:
+            continue
+
+        m = re.match(
+            r"[✓✗]\s+(\S+)\s+(\d+)\s+pass\s+(\d+)\s+fail\s+\((.+?)\)", clean,
+        )
+        if m:
+            found = True
+            name = m.group(1)
+            passed, failed = int(m.group(2)), int(m.group(3))
+            t = m.group(4)
+            detail = _perf_detail(t, perf.get(name))
+
+            icon = ui.green("✓") if failed == 0 else ui.red("✗")
+            n = f"{name:<22}"
+            v = f"{passed} pass, {failed} fail" if failed else f"{passed} pass"
+            v = f"{v:<16}"
+            d = f"{ui.dim('→')} {ui.dim(detail)}"
+            print(f"{P}  {icon} {n}{v}{d}", flush=True)
+
+    try:
+        proc.wait(timeout=300)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+        ui.item_fail("runner", "timeout")
+        return False
+
+    ok = proc.returncode == 0
+
+    if not found and not ok:
+        for line in all_output[-8:]:
+            stripped = strip_ansi(line).strip()
+            if stripped:
+                print(f"{P}       {ui.dim(stripped[:120])}")
+
+    _e2e_summary(all_output)
+
+    return ok
+
+
 # ── Main ──────────────────────────────────────────────
 
 def main():
     args = sys.argv[1:]
 
-    flags = {"--no-test", "--dry-run"}
+    flags = {"--no-test", "--dry-run", "--no-e2e"}
     no_test = "--no-test" in args
     dry_run = "--dry-run" in args
+    no_e2e = "--no-e2e" in args
     args = [a for a in args if a not in flags]
 
     if args:
@@ -387,6 +550,9 @@ def main():
             sys.exit(1)
     else:
         services = DEPLOY_ORDER
+
+    show_e2e = not no_e2e
+    will_e2e = show_e2e and not dry_run
 
     env_vars = load_env()
     ui.header("deploy")
@@ -413,14 +579,25 @@ def main():
 
     # Verify
     if not dry_run:
-        if not phase_verify(services, deploy_states):
+        if not phase_verify(services, deploy_states, is_last=not show_e2e):
             print()
             ui.warn("deployed but verification failed")
             print()
             sys.exit(1)
     else:
-        ui.group_end("verify")
+        ui.group_mid("verify") if show_e2e else ui.group_end("verify")
         ui.item_none("skip", ui.dim("--dry-run"))
+
+    # E2E (all layers: smoke + int + e2e)
+    if will_e2e:
+        if not phase_e2e():
+            print()
+            ui.warn("deployed but e2e tests failed")
+            print()
+            sys.exit(1)
+    elif show_e2e:
+        ui.group_end("e2e")
+        ui.item_none("skip", ui.dim("--dry-run" if dry_run else "--no-e2e"))
 
     print()
     ui.ok("all services deployed and verified")
