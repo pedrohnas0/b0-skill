@@ -7,7 +7,7 @@ Usage:
   db ai "SELECT COUNT(*) FROM sessions"
   db auth "SELECT * FROM users LIMIT 5"
 
-Services: ai, auth
+Services: ai, auth, obs
 """
 
 import json
@@ -25,6 +25,7 @@ import ui
 SERVICES = {
     "ai":   Path(os.path.expanduser("~/dev/buildzero/services/ai")),
     "auth": Path(os.path.expanduser("~/dev/buildzero/services/auth")),
+    "obs":  Path(os.path.expanduser("~/dev/buildzero/services/observe")),
 }
 
 

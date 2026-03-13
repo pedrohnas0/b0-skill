@@ -458,7 +458,7 @@ def _e2e_summary(output):
     print(f"  {ui.dim('│')}  {ui.green(f'{passed} ✓')}{fail_part}  {t}")
 
 
-def phase_e2e(layer="smoke,int,e2e", source="deploy"):
+def phase_e2e(layer="smoke,int,e2e", source="deploy", verbose=False):
     ui.group_end("e2e")
 
     # Load perf history before running (for inline comparison)
@@ -468,8 +468,9 @@ def phase_e2e(layer="smoke,int,e2e", source="deploy"):
         "bun", "tests/run.ts",
         "--layer", layer,
         "--source", source,
-        "--quiet",
     ]
+    if not verbose:
+        cmd.append("--quiet")
 
     P = f"  {ui.dim('│')}"
 
@@ -489,6 +490,9 @@ def phase_e2e(layer="smoke,int,e2e", source="deploy"):
         line = raw.rstrip("\n")
         all_output.append(line)
         clean = strip_ansi(line).strip()
+        if verbose and clean:
+            print(f"{P}  {ui.dim(clean[:160])}", flush=True)
+
         if not clean:
             continue
 
@@ -508,6 +512,23 @@ def phase_e2e(layer="smoke,int,e2e", source="deploy"):
             v = f"{v:<16}"
             d = f"{ui.dim('→')} {ui.dim(detail)}"
             print(f"{P}  {icon} {n}{v}{d}", flush=True)
+
+        if clean.startswith("##metrics:"):
+            try:
+                md = json.loads(clean[10:])
+                cold = md.get("cold", {})
+                warm = md.get("warm", {})
+                tc = md.get("totalCost", 0)
+                ch = md.get("cacheHitRate", 0)
+                metrics_str = (
+                    f"cold {fmt_ms(cold.get('latencyMs', 0))} ${cold.get('cost', 0):.4f}"
+                    f" · warm {fmt_ms(warm.get('latencyMs', 0))} ${warm.get('cost', 0):.4f}"
+                    f" · cache {ch}%"
+                    f" · ${tc:.4f} total"
+                )
+                print(f"{P}    {ui.dim(metrics_str)}", flush=True)
+            except Exception:
+                pass
 
     try:
         proc.wait(timeout=300)
@@ -535,10 +556,11 @@ def phase_e2e(layer="smoke,int,e2e", source="deploy"):
 def main():
     args = sys.argv[1:]
 
-    flags = {"--no-test", "--dry-run", "--no-e2e"}
+    flags = {"--no-test", "--dry-run", "--no-e2e", "--verbose", "-v"}
     no_test = "--no-test" in args
     dry_run = "--dry-run" in args
     no_e2e = "--no-e2e" in args
+    verbose = "--verbose" in args or "-v" in args
     args = [a for a in args if a not in flags]
 
     if args:
@@ -590,7 +612,7 @@ def main():
 
     # E2E (all layers: smoke + int + e2e)
     if will_e2e:
-        if not phase_e2e():
+        if not phase_e2e(verbose=verbose):
             print()
             ui.warn("deployed but e2e tests failed")
             print()

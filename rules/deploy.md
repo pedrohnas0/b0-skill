@@ -18,7 +18,7 @@ deploy --dry-run          # mostrar plano sem executar
 
 ## Ordem de deploy
 
-`auth → ai → ai-worker → telegram → web`
+`observe → auth → ai → ai-worker → telegram → web`
 
 Serviços deployam em **paralelo**. Dependências:
 - `auth` precisa estar up antes de `ai` (validates channels)
@@ -30,12 +30,14 @@ Serviços deployam em **paralelo**. Dependências:
 
 | Mudou | Deploy |
 |-------|--------|
+| `services/observe/` | `deploy observe` |
 | `services/auth/` | `deploy auth` |
 | `services/ai/` | `deploy ai` |
 | `services/ai-worker/` | `deploy ai-worker` |
 | `services/telegram/` | `deploy telegram` |
 | `services/web/` | `deploy web` |
 | `packages/sdk/` ou `packages/log/` | `deploy ai-worker telegram` (consumers) |
+| `packages/obs/` | `deploy observe ai-worker telegram` (consumers) |
 | Múltiplos | `deploy` (todos) |
 
 ## Verificação
@@ -44,6 +46,7 @@ Após deploy, o script checa health endpoints de todos os serviços.
 Usa `User-Agent: b0-deploy/1.0` (Cloudflare bloqueia user-agent padrão do urllib).
 
 Health endpoints:
+- observe: `/health`
 - auth: `/api/health`
 - ai: `/api/health`
 - ai-worker: `/health`
