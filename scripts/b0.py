@@ -16,7 +16,7 @@ import ui
 
 SKILL_DIR = Path("/home/pedro/dev/.claude/skills/b0-skill")
 ENV_FILE = SKILL_DIR / ".env"
-SYMLINKS = {"s": "s.py", "ghcp": "ghcp.py", "cf": "cf.py", "b0": "b0.py", "deploy": "deploy.py"}
+SYMLINKS = {"s": "s.py", "ghcp": "ghcp.py", "cf": "cf.py", "b0": "b0.py", "deploy": "deploy.py", "dev": "task-manager.py"}
 
 
 def run(cmd, timeout=5):
